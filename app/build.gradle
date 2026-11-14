@@ -8,11 +8,11 @@ android {
 
     defaultConfig {
         // Different application id from the defective, hand-assembled test APK.
-        applicationId 'com.example.s15tbrightnessprobe.v03'
+        applicationId 'com.example.s15tbrightnessprobe.v04'
         minSdk 37
         targetSdk 37
-        versionCode 3
-        versionName '0.3'
+        versionCode 4
+        versionName '0.4'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
