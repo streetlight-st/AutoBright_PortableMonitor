@@ -158,32 +158,32 @@ public final class MainActivity extends Activity implements SensorEventListener 
             out.append("USB Host API unavailable");
         } else {
             HashMap<String, UsbDevice> devices = manager.getDeviceList();
-            out.append("USB 장치 ").append(devices.size()).append("개\\n");
+            out.append("USB 장치 ").append(devices.size()).append("개\n");
             for (UsbDevice d : devices.values()) {
                 out.append(String.format(Locale.US, "VID:%04X PID:%04X", d.getVendorId(), d.getProductId()));
                 out.append(" 클래스:").append(d.getDeviceClass());
-                out.append(" 인터페이스:").append(d.getInterfaceCount()).append("\\n");
+                out.append(" 인터페이스:").append(d.getInterfaceCount()).append("\n");
                 for (int i = 0; i < d.getInterfaceCount(); i++) {
                     UsbInterface inf = d.getInterface(i);
                     out.append("  #").append(i)
                        .append(" class=").append(inf.getInterfaceClass())
                        .append(" subclass=").append(inf.getInterfaceSubclass())
                        .append(" protocol=").append(inf.getInterfaceProtocol())
-                       .append(" endpoints=").append(inf.getEndpointCount()).append("\\n");
+                       .append(" endpoints=").append(inf.getEndpointCount()).append("\n");
                     for (int e = 0; e < inf.getEndpointCount(); e++) {
                         UsbEndpoint ep = inf.getEndpoint(e);
                         out.append("    ep=0x").append(Integer.toHexString(ep.getAddress()))
-                           .append(" type=").append(ep.getType()).append("\\n");
+                           .append(" type=").append(ep.getType()).append("\n");
                     }
                 }
             }
         }
         File onigiriNode = new File("/sys/module/msm_drm/parameters/secdp_ddc_brightness");
-        out.append("Onigiri DDC 커널 노드 존재: ").append(onigiriNode.exists()).append("\\n");
+        out.append("Onigiri DDC 커널 노드 존재: ").append(onigiriNode.exists()).append("\n");
         out.append("주의: DP AUX 영상 경로는 USB 호스트 장치 목록에 보이지 않을 수 있음.");
         String report = out.toString();
         usbText.setText(report);
-        record("USB 조사(읽기 전용): " + report.replace('\\n', ' '));
+        record("USB 조사(읽기 전용): " + report.replace('\n', ' '));
     }
     private void copyLog() {
         ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
