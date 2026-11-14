@@ -10,6 +10,13 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
+import android.hardware.usb.UsbManager;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbInterface;
+import android.hardware.usb.UsbEndpoint;
+import java.io.File;
+import java.util.HashMap;
+import java.util.Locale;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,7 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public final class MainActivity extends Activity implements SensorEventListener {
-    private TextView displayText, resultText, sensorText, logText;
+    private TextView displayText, resultText, sensorText, usbText, logText;
     private final StringBuilder log = new StringBuilder();
     private DisplayManager dm;
     private SensorManager sm;
@@ -39,7 +46,7 @@ public final class MainActivity extends Activity implements SensorEventListener 
             root.setPadding(24, 28, 24, 48);
             scroll.addView(root);
             setContentView(scroll);
-            text(root, "S15T 밝기 테스트 0.3", 24);
+            text(root, "외부 모니터 USB 진단 0.4", 24);
             text(root, "Android 17 외부 모니터 테스트. 정차 중에만 사용하세요.", 15);
             button(root, "① 외부 디스플레이 검색", this::scan);
             displayText = text(root, "검색 전", 15);
@@ -50,7 +57,9 @@ public final class MainActivity extends Activity implements SensorEventListener 
             resultText = text(root, "밝기 테스트 전", 15);
             button(root, "④ 조도센서 시작", this::startSensor);
             sensorText = text(root, "조도센서 측정 전", 15);
-            button(root, "⑤ 진단 로그 복사", this::copyLog);
+            button(root, "⑤ USB 장치 및 제어 인터페이스 조사", this::inspectUsb);
+            usbText = text(root, "USB 조사 전 (DDC/CI 영상 통신과는 별도)", 13);
+            button(root, "⑥ 진단 로그 복사", this::copyLog);
             logText = text(root, "", 12);
             record("앱 화면 실행 성공 / Android " + Build.VERSION.RELEASE + " SDK " + Build.VERSION.SDK_INT + " / " + Build.MODEL);
         } catch (Throwable e) {
@@ -136,6 +145,45 @@ public final class MainActivity extends Activity implements SensorEventListener 
     @Override public void onPause() {
         if (sm != null) { sm.unregisterListener(this); sensorActive = false; }
         super.onPause();
+    }
+    /**
+     * Read-only discovery only: enumerating USB class devices does not access
+     * DisplayPort AUX. A TYPEC display may be visible to DisplayManager even
+     * when no USB device appears here. Never send vendor commands blindly.
+     */
+    private void inspectUsb() {
+        UsbManager manager = (UsbManager)getSystemService(Context.USB_SERVICE);
+        StringBuilder out = new StringBuilder();
+        if (manager == null) {
+            out.append("USB Host API unavailable");
+        } else {
+            HashMap<String, UsbDevice> devices = manager.getDeviceList();
+            out.append("USB 장치 ").append(devices.size()).append("개\\n");
+            for (UsbDevice d : devices.values()) {
+                out.append(String.format(Locale.US, "VID:%04X PID:%04X", d.getVendorId(), d.getProductId()));
+                out.append(" 클래스:").append(d.getDeviceClass());
+                out.append(" 인터페이스:").append(d.getInterfaceCount()).append("\\n");
+                for (int i = 0; i < d.getInterfaceCount(); i++) {
+                    UsbInterface inf = d.getInterface(i);
+                    out.append("  #").append(i)
+                       .append(" class=").append(inf.getInterfaceClass())
+                       .append(" subclass=").append(inf.getInterfaceSubclass())
+                       .append(" protocol=").append(inf.getInterfaceProtocol())
+                       .append(" endpoints=").append(inf.getEndpointCount()).append("\\n");
+                    for (int e = 0; e < inf.getEndpointCount(); e++) {
+                        UsbEndpoint ep = inf.getEndpoint(e);
+                        out.append("    ep=0x").append(Integer.toHexString(ep.getAddress()))
+                           .append(" type=").append(ep.getType()).append("\\n");
+                    }
+                }
+            }
+        }
+        File onigiriNode = new File("/sys/module/msm_drm/parameters/secdp_ddc_brightness");
+        out.append("Onigiri DDC 커널 노드 존재: ").append(onigiriNode.exists()).append("\\n");
+        out.append("주의: DP AUX 영상 경로는 USB 호스트 장치 목록에 보이지 않을 수 있음.");
+        String report = out.toString();
+        usbText.setText(report);
+        record("USB 조사(읽기 전용): " + report.replace('\\n', ' '));
     }
     private void copyLog() {
         ClipboardManager cm = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
