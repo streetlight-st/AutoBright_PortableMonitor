@@ -1,0 +1,25 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.example.s15tbrightnessprobe'
+    compileSdk 37
+
+    defaultConfig {
+        // Different application id from the defective, hand-assembled test APK.
+        applicationId 'com.example.s15tbrightnessprobe.v03'
+        minSdk 37
+        targetSdk 37
+        versionCode 3
+        versionName '0.3'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    buildTypes {
+        debug { minifyEnabled false }
+        release { minifyEnabled false }
+    }
+}
