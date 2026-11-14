@@ -1,4 +1,4 @@
-name: Build S15T 0.3 APK
+name: Build S15T 0.4 USB Diagnostic APK
 on:
   workflow_dispatch:
   push:
@@ -30,6 +30,6 @@ jobs:
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose app/build/outputs/apk/debug/app-debug.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: S15T-v03-installable-debug-apk
+          name: S15T-v04-usb-diagnostic-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
