@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <application
         android:allowBackup="false"
-        android:label="S15T 밝기 테스트 0.3"
+        android:label="S15T USB 진단 0.4"
         android:theme="@style/AppTheme"
         android:supportsRtl="true">
         <activity
